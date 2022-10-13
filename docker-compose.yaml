@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  redis:
+    container_name: hub-cache-redis
+    image: redis:7.0.5-alpine3.16
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - cache_data:/data
+    networks:
+      - hub-proxy-intranet
+
+  hub-proxy:
+    image: ghcr.io/dyrector-io/hub-proxy:latest
+    build: .
+    container_name: hub-proxy
+    ports:
+      - 9999:9999
+    networks:
+      - hub-proxy-intranet
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - TOKEN=$TOKEN
+
+volumes:
+  cache_data:
+
+networks:
+  hub-proxy-intranet:
